@@ -3,9 +3,9 @@
 
 const express = require("express");
 
-const app = express();
 const ExpressError = require("./expressError");
 const companiesRouter = require("./routes/companies");
+const app = express();
 
 app.use(express.json());
 
@@ -24,8 +24,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
 
   return res.json({
-    error: err,
-    message: err.message
+    error: err
   });
 });
 

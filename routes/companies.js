@@ -9,7 +9,7 @@ router.get("/", async function (req, res, next) {
     const result = await db.query(
       `SELECT code, name FROM companies`);
 
-    if (result.rows.length === 0){
+    if (result.rows.length === 0) {
       throw new ExpressError("company table is empty", 500);
     }
 
@@ -33,7 +33,7 @@ router.get("/:code", async function (req, res, next) {
        WHERE code = $1`, [code]
     );
 
-    if (result.rows.length === 0){
+    if (result.rows.length === 0) {
       throw new ExpressError("Please input a valid company code", 400);
     }
 
@@ -52,7 +52,7 @@ router.post("/", async function (req, res, next) {
   const { code, name, description } = req.body
 
   try {
-    if (!code || !name || !description || Object.keys(req.body).length !== 3){
+    if (!code || !name || !description || Object.keys(req.body).length !== 3) {
       throw new ExpressError("Please input valid company information (Code, Name, Description)", 400);
     }
     const result = await db.query(
@@ -79,10 +79,10 @@ router.put("/:code", async function (req, res, next) {
   const { name, description } = req.body;
 
   try {
-    if (!name || !description || Object.keys(req.body).length !== 2){
+    if (!name || !description || Object.keys(req.body).length !== 2) {
       throw new ExpressError("Please input valid information for each field", 400);
     }
-    
+
     const result = await db.query(
       `UPDATE companies
        SET name=$2, description=$3
@@ -90,7 +90,7 @@ router.put("/:code", async function (req, res, next) {
        RETURNING code, name, description`, [code, name, description]
     );
 
-    if (result.rows.length === 0){
+    if (result.rows.length === 0) {
       throw new ExpressError("Thats not a Company in this Database", 400);
     }
 
@@ -108,20 +108,16 @@ router.delete("/:code", async function (req, res, next) {
   const code = req.params.code;
 
   try {
+
     const result = await db.query(
-      `SELECT code, name, description
-       FROM companies 
-       WHERE code = $1`, [code]
+      `DELETE FROM companies
+      WHERE code = $1
+      RETURNING $1`, [code]
     );
-    
-    if (result.rows.length === 0){
+
+    if (result.rows.length === 0) {
       throw new ExpressError("Please input a valid company code", 400);
     }
-
-    await db.query(
-      `DELETE FROM companies
-       WHERE code = $1`, [code]
-    );
 
     return res.json({
       status: "deleted"

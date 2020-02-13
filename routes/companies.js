@@ -10,7 +10,7 @@ router.get("/", async function (req, res, next) {
       `SELECT code, name FROM companies`);
 
     if (result.rows.length === 0) {
-      throw new ExpressError("company table is empty", 500);
+      throw new ExpressError("company table is empty", 400);
     }
 
     return res.json({
@@ -22,6 +22,7 @@ router.get("/", async function (req, res, next) {
     return next(err);
   }
 });
+
 
 router.get("/:code", async function (req, res, next) {
   const code = req.params.code;
@@ -47,14 +48,24 @@ router.get("/:code", async function (req, res, next) {
   }
 });
 
+
 router.post("/", async function (req, res, next) {
 
   const { code, name, description } = req.body
 
   try {
-    if (!code || !name || !description || Object.keys(req.body).length !== 3) {
-      throw new ExpressError("Please input valid company information (Code, Name, Description)", 400);
+
+    let validKeys = ["code", "name", "description"];
+    for(let key in req.body){
+      if(validKeys.indexOf(key) === -1){
+        throw new ExpressError("Not all input keys are valid.", 400);
+      }
     }
+
+    if (!code || !name) {
+      throw new ExpressError("Please input company code and name.", 400);
+    }
+
     const result = await db.query(
       `INSERT INTO companies
        (code, name, description)
@@ -79,8 +90,16 @@ router.put("/:code", async function (req, res, next) {
   const { name, description } = req.body;
 
   try {
-    if (!name || !description || Object.keys(req.body).length !== 2) {
-      throw new ExpressError("Please input valid information for each field", 400);
+
+    let validKeys = ["name", "description"];
+    for(let key in req.body){
+      if(validKeys.indexOf(key) === -1){
+        throw new ExpressError("Not all input keys are valid.", 400);
+      }
+    }
+
+    if (!name) {
+      throw new ExpressError("Please input valid name for company.", 400);
     }
 
     const result = await db.query(

@@ -4,23 +4,15 @@ const ExpressError = require("../expressError")
 const router = new express.Router();
 
 
-router.get("/", async function (req, res, next) {
-  try {
+router.get("/", async function (req, res) { 
+
     const result = await db.query(
       `SELECT code, name FROM companies`);
-
-    if (result.rows.length === 0) {
-      throw new ExpressError("company table is empty", 400);
-    }
 
     return res.json({
       companies: result.rows
     });
-  }
 
-  catch (err) {
-    return next(err);
-  }
 });
 
 
@@ -28,18 +20,28 @@ router.get("/:code", async function (req, res, next) {
   const code = req.params.code;
 
   try {
-    const result = await db.query(
+    const compResp = await db.query(
       `SELECT code, name, description
        FROM companies 
        WHERE code = $1`, [code]
     );
 
-    if (result.rows.length === 0) {
+    const invoicesResp = await db.query(
+      `SELECT id, amt, paid, add_date, paid_date
+       FROM invoices
+       WHERE comp_code = $1`, [code]
+    );
+    
+    if (compResp.rows.length === 0) {
       throw new ExpressError("Please input a valid company code", 400);
     }
 
+    const company = compResp.rows[0];
+    const invoices = invoicesResp.rows;
+    const result = { ...company, invoices }
+
     return res.json({
-      company: result.rows[0]
+      company: result
     });
   }
 

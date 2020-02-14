@@ -5,11 +5,13 @@ const express = require("express");
 
 const ExpressError = require("./expressError");
 const companiesRouter = require("./routes/companies");
+const invoicesRouter = require("./routes/invoices");
 const app = express();
 
 app.use(express.json());
 
 app.use('/companies', companiesRouter);
+app.use('/invoices', invoicesRouter);
 
 /** 404 handler */
 
